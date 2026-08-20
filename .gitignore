@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+*.sqlite3
+
+# Uploaded and generated files
+media/uploads/*
+media/exports/*
+datalab/media/uploads/*
+datalab/media/exports/*
+
+# Keep directories
+!media/uploads/.gitkeep
+!media/exports/.gitkeep
+!datalab/media/uploads/.gitkeep
+!datalab/media/exports/.gitkeep
+
+# Environment variables
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Python tools
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Logs
+*.log
+
+# DB Browser for SQLite project files
+*.sqbpro

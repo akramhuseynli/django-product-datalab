@@ -1,0 +1,288 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .stat-row {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .stat-table {
+        flex: 1;
+    }
+
+    .stat-chart {
+        flex: 1;
+        max-width: 650px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 8px;
+        text-align: left;
+    }
+</style>
+
+<h2>Statistics</h2>
+
+<h3>1) Monthly Income</h3>
+
+<div class="stat-row">
+
+    <div class="stat-table">
+        <table border="1">
+            <tr>
+                <th>Month</th>
+                <th>Income</th>
+                <th>Count</th>
+            </tr>
+
+            {% for r in monthly %}
+                <tr>
+                    <td>{{ r.month|date:"Y-m" }}</td>
+                    <td>{{ r.revenue }}</td>
+                    <td>{{ r.items }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="stat-chart">
+        <canvas id="monthlyChart"></canvas>
+    </div>
+
+</div>
+
+<h3>2) Quarterly Income</h3>
+
+<div class="stat-row">
+
+    <div class="stat-table">
+        <table border="1">
+            <tr>
+                <th>Quarter</th>
+                <th>Income</th>
+                <th>Average Price</th>
+            </tr>
+
+            {% for r in quarterly %}
+                <tr>
+                    <td>{{ r.q }}</td>
+                    <td>{{ r.revenue }}</td>
+                    <td>{{ r.avg_price }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="stat-chart">
+        <canvas id="quarterlyChart"></canvas>
+    </div>
+
+</div>
+
+<h3>3) By Category</h3>
+
+<div class="stat-row">
+
+    <div class="stat-table">
+        <table border="1">
+            <tr>
+                <th>Category</th>
+                <th>Average Price</th>
+                <th>Total Stock</th>
+            </tr>
+
+            {% for r in by_cat %}
+                <tr>
+                    <td>{{ r.category }}</td>
+                    <td>{{ r.mean_price }}</td>
+                    <td>{{ r.total_qty }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="stat-chart">
+        <canvas id="categoryChart"></canvas>
+    </div>
+
+</div>
+
+<h3>4) TOP SKU (Revenue)</h3>
+
+<div class="stat-row">
+
+    <div class="stat-table">
+        <table border="1">
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Revenue</th>
+                <th>Stock</th>
+            </tr>
+
+            {% for r in top_sku %}
+                <tr>
+                    <td>{{ r.sku }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.category }}</td>
+                    <td>{{ r.revenue }}</td>
+                    <td>{{ r.qty }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="stat-chart">
+        <canvas id="topSkuChart"></canvas>
+    </div>
+
+</div>
+
+<h3>5) Low Stock (≤5)</h3>
+
+<div class="stat-row">
+
+    <div class="stat-table">
+        <table border="1">
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Count</th>
+            </tr>
+
+            {% for p in low_stock %}
+                <tr>
+                    <td>{{ p.sku }}</td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.quantity }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="stat-chart">
+        <canvas id="lowStockChart"></canvas>
+    </div>
+
+</div>
+
+
+<p><a href="{% url 'product_list' %}">Products</a></p>
+
+
+<script>
+    const monthlyCtx=document.getElementById("monthlyChart");
+
+    new Chart(monthlyCtx, {
+        type:"line",
+        data:{
+            labels:[
+                {% for r in monthly %}
+                    "{{ r.month|date:'Y-m' }}",
+                {% endfor %}
+            ],
+            datasets:[{
+                label:"Monthly Income",
+                data:[
+                    {% for r in monthly %}
+                        "{{ r.revenue }}",
+                    {% endfor %}
+                ]
+            }]
+        }
+    });
+
+    const quarterlyCtx=document.getElementById("quarterlyChart");
+
+    new Chart(quarterlyCtx,{
+        type:"bar",
+        data:{
+            labels:[
+                {% for r in quarterly %}
+                    "Q{{ r.q }}",
+                {% endfor %}
+            ],
+            datasets:[{
+                label:"Quarterly Income",
+                data: [
+                    {% for r in quarterly %}
+                        {{ r.revenue }},
+                    {% endfor %}
+                ]
+            }]
+        }
+    });
+
+    const categoryCtx=document.getElementById("categoryChart");
+
+    new Chart(categoryCtx,{
+        type:"bar",
+        data:{
+            labels:[
+                {% for r in by_cat %}
+                    "{{ r.category }}",
+                {% endfor %}
+            ],
+            datasets:[{
+                label:"Total Stock",
+                data: [
+                    {% for r in by_cat %}
+                        {{ r.total_qty }},
+                    {% endfor %}
+                ]
+            }]
+        }
+    });
+
+    const topSkuCtx = document.getElementById("topSkuChart");
+
+    new Chart(topSkuCtx, {
+        type: "bar",
+        data: {
+            labels: [
+                {% for r in top_sku %}
+                    "{{ r.sku }}",
+                {% endfor %}
+            ],
+            datasets: [{
+                label: "Revenue",
+                data: [
+                    {% for r in top_sku %}
+                        {{ r.revenue }},
+                    {% endfor %}
+                ]
+            }]
+        }
+    });
+
+    const lowStockCtx = document.getElementById("lowStockChart");
+
+    new Chart(lowStockCtx, {
+        type: "bar",
+        data: {
+            labels: [
+                {% for p in low_stock %}
+                    "{{ p.sku }}",
+                {% endfor %}
+            ],
+            datasets: [{
+                label: "Remaining Stock",
+                data: [
+                    {% for p in low_stock %}
+                        {{ p.quantity }},
+                    {% endfor %}
+                ]
+            }]
+        }
+    });
+
+</script>
